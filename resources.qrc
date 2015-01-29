@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>default.docx</file>
+    </qresource>
+</RCC>
