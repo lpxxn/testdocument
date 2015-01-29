@@ -8,7 +8,8 @@
 #include <QColor>
 #include <QDomDocument>
 
-#include "docx/document.h"
+#include <docx/document.h>
+#include <docx/text.h>
 
 
 using namespace Docx;
@@ -20,7 +21,7 @@ class TestDocument : public QObject
 public:
     TestDocument();
 
-public Q_SLOTS:
+private Q_SLOTS:
     void testLoad();
 };
 
@@ -32,8 +33,13 @@ TestDocument::TestDocument()
 
 void TestDocument::testLoad()
 {
-    Document doc(QStringLiteral("aaa.docx"));
-
+    //demo.docx  Empty.docx
+    Document doc(QStringLiteral("Empty.docx"));
+    Paragraph *p = doc.addParagraph("helleWord", "");
+    p->insertParagraphBefore("Before", "");
+    Run *addRun = p->addRun("AddRun");
+    addRun->addText("Hello");
+    doc.save("aSave.docx");
 }
 
 
