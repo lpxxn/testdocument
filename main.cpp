@@ -84,6 +84,16 @@ void TestDocument::testLoad()
     run->setUnderLine(WD_UNDERLINE::DOT_DASH);
     run->addTab();
 
+    doc.addParagraph();
+    p2 = doc.addParagraph("Alignment1");
+    p2->setAlignment(WD_PARAGRAPH_ALIGNMENT::CENTER);
+
+    p2 = doc.addParagraph("Alignment2");
+    p2->setAlignment(WD_PARAGRAPH_ALIGNMENT::DISTRIBUTE);
+
+    p2 = doc.addParagraph("Alignment3");
+    p2->setAlignment(WD_PARAGRAPH_ALIGNMENT::JUSTIFY_HI);
+
     doc.save("aSave.docx");
 }
 
