@@ -35,6 +35,7 @@ void TestDocument::testLoad()
 {
     //demo.docx  Empty.docx default.docx
     Document doc(QStringLiteral("://default.docx"));
+    doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
     Run *addRun = p->addRun("AddRun");
@@ -42,6 +43,8 @@ void TestDocument::testLoad()
     addRun->addText("Hello");
 
     doc.addParagraph();
+    doc.addHeading("MyHead1");
+
     Paragraph *emptyP = doc.addParagraph();
     emptyP->addRun("EmptyParagraph", "IntenseEmphasis");
 
@@ -53,7 +56,21 @@ void TestDocument::testLoad()
     r2->setBold(false);
     r2->setBold(true);
 
-    doc.addParagraph("Heading1", "Heading1");
+    doc.addHeading("Heading2", 2);
+    Paragraph *p3 = doc.addParagraph();
+    Run *run = p3->addRun("MyContent");
+    run->addText("abc");
+    run->setBold(true);
+
+    run = p3->addRun("Main");
+    run->setAllcaps(true);
+
+    run = p3->addRun("Main2");
+    run->setDoubleStrike(true);
+
+    run = p3->addRun("Main3");
+    run->setItalic(true);
+
     doc.save("aSave.docx");
 }
 
