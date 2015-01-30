@@ -84,6 +84,8 @@ void TestDocument::testLoad()
     run->setUnderLine(WD_UNDERLINE::DOT_DASH);
     run->addTab();
 
+    qDebug() << p3->text();
+
     doc.addParagraph();
     p2 = doc.addParagraph("Alignment1");
     p2->setAlignment(WD_PARAGRAPH_ALIGNMENT::CENTER);
