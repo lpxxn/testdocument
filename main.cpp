@@ -38,6 +38,9 @@ void TestDocument::testLoad()
     doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
+    p->insertParagraphBefore("Number1", "ListNumber");
+    p->insertParagraphBefore("Number2", "ListNumber");
+
     Run *addRun = p->addRun("AddRun");
     addRun->setStyle(QStringLiteral("Emphasis"));
     addRun->addText("Hello");
@@ -46,6 +49,8 @@ void TestDocument::testLoad()
     doc.addHeading("MyHead1");
 
     Paragraph *emptyP = doc.addParagraph();
+    Run * tabRun = emptyP->addRun();
+    tabRun->addTab();
     emptyP->addRun("EmptyParagraph", "IntenseEmphasis");
 
     doc.addParagraph("West", "IntenseQuoteChar");
@@ -61,15 +66,23 @@ void TestDocument::testLoad()
     Run *run = p3->addRun("MyContent");
     run->addText("abc");
     run->setBold(true);
+    run->setUnderLine(WD_UNDERLINE::SINGLE);
+    run->addTab();
 
     run = p3->addRun("Main");
     run->setAllcaps(true);
+    run->setUnderLine(WD_UNDERLINE::DASH);
+    run->addTab();
 
     run = p3->addRun("Main2");
     run->setDoubleStrike(true);
+    run->setUnderLine(WD_UNDERLINE::DASH_HEAVY);
+    run->addTab();
 
     run = p3->addRun("Main3");
     run->setItalic(true);
+    run->setUnderLine(WD_UNDERLINE::DOT_DASH);
+    run->addTab();
 
     doc.save("aSave.docx");
 }
