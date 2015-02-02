@@ -8,6 +8,11 @@
 #include <QColor>
 #include <QDomDocument>
 
+#include <QImage>
+#include <QMimeDatabase>
+#include <QMimeType>
+
+
 #include <docx/document.h>
 #include <docx/text.h>
 
@@ -19,10 +24,11 @@ class TestDocument : public QObject
     Q_OBJECT
 
 public:
-    TestDocument();
+    TestDocument();    
 
 private Q_SLOTS:
     void testLoad();
+    void testImageInfo();
 };
 
 
@@ -31,10 +37,13 @@ TestDocument::TestDocument()
 
 }
 
+
+
 void TestDocument::testLoad()
 {
-    //demo.docx  Empty.docx default.docx
-    Document doc(QStringLiteral("://default.docx"));
+    //demo.docx  Empty.docx default.docx  ://Full.docx
+    //Document doc(QStringLiteral("://default.docx"));
+    Document doc(QStringLiteral("://Full.docx"));
     doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
@@ -84,6 +93,13 @@ void TestDocument::testLoad()
     run->setUnderLine(WD_UNDERLINE::DOT_DASH);
     run->addTab();
 
+    run = p3->addRun("Main3");
+    run->setSmallcaps(true);
+    run->setUnderLine(WD_UNDERLINE::None);
+    run->setShadow();
+    run->addTab();
+
+
     qDebug() << p3->text();
 
     doc.addParagraph();
@@ -99,6 +115,30 @@ void TestDocument::testLoad()
     doc.save("aSave.docx");
 }
 
+void TestDocument::testImageInfo()
+{
+    QString imagePath1("://c.png");
+    QString imagePath2("://139924.jpg");
+    QString imagePath3("://149341.jpg");
+    QString imagePath4("://185607.jpg");
+    QMimeDatabase base;
+    QMimeType fileInfo = base.mimeTypeForFile(imagePath1);
+
+
+    QImage image1(imagePath1);
+    qDebug() << "Image Info" ;
+    qDebug() << "Image name" << fileInfo.name() << "  suffixes " << fileInfo.preferredSuffix();
+    qDebug() << fileInfo.preferredSuffix().toStdString().c_str();
+
+    qDebug() << image1.rect() << "  " << image1.size();
+    qDebug() << "dpiX" << image1.logicalDpiX() << "  dpiY  " << image1.logicalDpiY();
+    //qDebug() << "preX" << image.dotsPerMeterX() << "  perY  " << image.dotsPerMeterY();
+    qDebug() << "cacheKey1" << image1.cacheKey();
+
+    QImage image11(imagePath1);
+    QImage image2(imagePath2);
+    qDebug() << "cacheKey11" << image11.cacheKey();
+}
 
 QTEST_APPLESS_MAIN(TestDocument)
 #include "main.moc"
