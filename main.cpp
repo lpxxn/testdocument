@@ -43,7 +43,7 @@ void TestDocument::testLoad()
 {
     //demo.docx  Empty.docx default.docx  ://Full.docx
     //Document doc(QStringLiteral("://default.docx"));
-    Document doc(QStringLiteral("://Full.docx"));
+    Document doc(QStringLiteral("://default.docx"));
     doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
@@ -111,6 +111,10 @@ void TestDocument::testLoad()
 
     p2 = doc.addParagraph("Alignment3");
     p2->setAlignment(WD_PARAGRAPH_ALIGNMENT::JUSTIFY_HI);
+
+    doc.addPicture("://139924.jpg");
+    doc.addPicture("://139924.jpg", Inches::emus(1.25));
+    doc.addPicture("://149341.jpg", Cm::emus(3), Cm::emus(10));
 
     doc.save("aSave.docx");
 }
