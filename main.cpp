@@ -50,7 +50,7 @@ void TestDocument::testLoad()
     //://Full.docx
     //://default.docx
 
-    Document doc(QStringLiteral("://default.docx"));
+    Document doc;
     doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
@@ -178,7 +178,8 @@ void TestDocument::testImageInfo()
 
 void TestDocument::testTable()
 {
-    Document doc(QStringLiteral("://default.docx"));
+    Document doc(QStringLiteral("aSave.docx"));
+    //Document doc;
     Table *table = doc.addTable(3, 3);
     QList<Cell *> cells = table->rowCells(0);
     cells.at(0)->addText("Hello");
@@ -188,6 +189,8 @@ void TestDocument::testTable()
     Run *r1 = p1->addRun();
     r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(10));
 
+    qDebug() << QString::fromLatin1("----Cell index  ") <<  cells.at(1)->cellIndex()
+             << QStringLiteral("--Row index  ") << cells.at(1)->rowIndex();
 
     QList<Cell *> cells2 = table->rowCells(1);
     Cell *cell = cells2.at(0);
