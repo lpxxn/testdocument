@@ -15,6 +15,7 @@
 
 #include <docx/document.h>
 #include <docx/text.h>
+#include <docx/table.h>
 
 
 using namespace Docx;
@@ -24,11 +25,12 @@ class TestDocument : public QObject
     Q_OBJECT
 
 public:
-    TestDocument();    
+    TestDocument();
 
 private Q_SLOTS:
     void testLoad();
     void testImageInfo();
+    void testTable();
 };
 
 
@@ -37,15 +39,18 @@ TestDocument::TestDocument()
 
 }
 
-
+const QString imagePath1("://c.png");
+const QString imagePath2("://139924.jpg");
+const QString imagePath3("://149341.jpg");
+const QString imagePath4("://185607.jpg");
 
 void TestDocument::testLoad()
 {
     //://Full2.docx
     //://Full.docx
-    //demo.docx  Empty.docx default.docx
-    //Document doc(QStringLiteral("://default.docx"));
-    Document doc(QStringLiteral("://Full2.docx"));
+    //://default.docx
+
+    Document doc(QStringLiteral("://default.docx"));
     doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
@@ -116,21 +121,42 @@ void TestDocument::testLoad()
 
     doc.addPicture("://139924.jpg");
     doc.addPicture("://139924.jpg", Inches::emus(1.25));
+    doc.addPicture("://149341.jpg", Cm::emus(13), Cm::emus(10));
     doc.addPicture("://149341.jpg", Cm::emus(3), Cm::emus(10));
     QImage img("://185607.jpg");
     qDebug() << img.size();
     doc.addPicture(img, Cm::emus(5));
     doc.addPicture(img, Cm::emus(2));
 
+    // Table
+    Table *table = doc.addTable(3, 3);
+    QList<Cell *> cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+    cells.at(1)->addText("Word");
+    cells.at(2)->addText("!!!");
+    Paragraph *p1 = cells.at(2)->addParagraph();
+    Run *r1 = p1->addRun();
+    r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(5));
+
+    QList<Cell *> cells2 = table->rowCells(1);
+    Cell *cell = cells2.at(0);
+    Table *table2 = cell->addTable(5, 5, "MediumShading1");
+    cells2 = table2->rowCells(1);
+    cells2.at(0)->addText("Table!!!");
+
+    p1 = cells2.at(2)->addParagraph();
+    r1 = p1->addRun();
+
+    r1->addPicture(imagePath2, Cm::emus(3), Cm::emus(5));
+
+    table->addColumn();
+    table->addRow();
     doc.save("aSave.docx");
 }
 
 void TestDocument::testImageInfo()
 {
-    QString imagePath1("://c.png");
-    QString imagePath2("://139924.jpg");
-    QString imagePath3("://149341.jpg");
-    QString imagePath4("://185607.jpg");
+
     QMimeDatabase base;
     QMimeType fileInfo = base.mimeTypeForFile(imagePath1);
 
@@ -150,5 +176,46 @@ void TestDocument::testImageInfo()
     qDebug() << "cacheKey11" << image11.cacheKey();
 }
 
+void TestDocument::testTable()
+{
+    Document doc(QStringLiteral("://default.docx"));
+    Table *table = doc.addTable(3, 3);
+    QList<Cell *> cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+    cells.at(1)->addText("Word");
+    cells.at(2)->addText("!!!");
+    Paragraph *p1 = cells.at(2)->addParagraph();
+    Run *r1 = p1->addRun();
+    r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(10));
+
+
+    QList<Cell *> cells2 = table->rowCells(1);
+    Cell *cell = cells2.at(0);
+    Table *table2 = cell->addTable(5, 5, "MediumShading1");
+    cells2 = table2->rowCells(1);
+    cells2.at(0)->addText("Table!!!");
+
+    p1 = cells2.at(2)->addParagraph();
+    r1 = p1->addRun();
+
+    r1->addPicture(imagePath2, Cm::emus(3), Cm::emus(10));
+
+    doc.addParagraph();
+
+    table = doc.addTable(3, 3);
+    table->setAlignment(WD_TABLE_ALIGNMENT::RIGHT);
+    cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+
+    table = doc.addTable(3, 3);
+    table->setAlignment(WD_TABLE_ALIGNMENT::CENTER);
+    cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+
+
+    doc.save("atable.docx");
+}
+
 QTEST_APPLESS_MAIN(TestDocument)
 #include "main.moc"
+
