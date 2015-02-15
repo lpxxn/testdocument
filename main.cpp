@@ -178,9 +178,9 @@ void TestDocument::testImageInfo()
 
 void TestDocument::testTable()
 {
-    Document doc(QStringLiteral("aSave.docx"));
-    //Document doc;
-    Table *table = doc.addTable(3, 3);
+    //Document doc(QStringLiteral("aSave.docx"));
+    Document doc;
+    Table *table = doc.addTable(5, 5);
     QList<Cell *> cells = table->rowCells(0);
     cells.at(0)->addText("Hello");
     cells.at(1)->addText("Word");
@@ -189,32 +189,56 @@ void TestDocument::testTable()
     Run *r1 = p1->addRun();
     r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(10));
 
+    Cell *cell00 = table->cell(0, 0);
+    Cell *cell12 = table->cell(1, 2);
+
+    cell00->merge(cell12);
+
     qDebug() << QString::fromLatin1("----Cell index  ") <<  cells.at(1)->cellIndex()
              << QStringLiteral("--Row index  ") << cells.at(1)->rowIndex();
 
-    QList<Cell *> cells2 = table->rowCells(1);
-    Cell *cell = cells2.at(0);
-    Table *table2 = cell->addTable(5, 5, "MediumShading1");
-    cells2 = table2->rowCells(1);
-    cells2.at(0)->addText("Table!!!");
+//    QList<Cell *> cells2 = table->rowCells(1);
+//    Cell *cell = cells2.at(0);
+//    Table *table2 = cell->addTable(5, 5, "MediumShading1");
+//    cells2 = table2->rowCells(1);
+//    cells2.at(0)->addText("Table!!!");
 
-    p1 = cells2.at(2)->addParagraph();
-    r1 = p1->addRun();
+//    p1 = cells2.at(2)->addParagraph();
+//    r1 = p1->addRun();
 
-    r1->addPicture(imagePath2, Cm::emus(3), Cm::emus(10));
+//    r1->addPicture(imagePath2, Cm::emus(3), Cm::emus(10));
 
+
+//    table->addRow();
+//    table->addColumn();
+//    table->addColumn();
     doc.addParagraph();
 
+
+    Cell *cell04 = table->cell(0, 4);
+    Cell *cell44 = table->cell(2, 4);
+    cell44->merge(cell04);
+
+    cell44 = table->cell(2, 4);
+    cell44->addParagraph("new Paragraph");
+
+    cell00 = table->cell(0, 0);
+    Cell *cell22 = table->cell(2, 2);
+    cell00->merge(cell22);
+
+    // _______________
     table = doc.addTable(3, 3);
     table->setAlignment(WD_TABLE_ALIGNMENT::RIGHT);
     cells = table->rowCells(0);
     cells.at(0)->addText("Hello");
+    cells.at(1)->merge(table->cell(2, 2));
 
     table = doc.addTable(3, 3);
     table->setAlignment(WD_TABLE_ALIGNMENT::CENTER);
     cells = table->rowCells(0);
     cells.at(0)->addText("Hello");
 
+    cells.at(0)->merge(cells.at(2));
 
     doc.save("atable.docx");
 }
