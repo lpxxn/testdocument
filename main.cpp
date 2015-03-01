@@ -28,8 +28,9 @@ public:
     TestDocument();
 
 private Q_SLOTS:
-    void testLoad();
-    void testImageInfo();
+    void testNewDoc();
+    void testLoadDoc();
+    void testImageInfo();    
     void testTable();
 };
 
@@ -44,7 +45,7 @@ const QString imagePath2("://139924.jpg");
 const QString imagePath3("://149341.jpg");
 const QString imagePath4("://185607.jpg");
 
-void TestDocument::testLoad()
+void TestDocument::testNewDoc()
 {
     //://Full2.docx
     //://Full.docx
@@ -62,7 +63,7 @@ void TestDocument::testLoad()
     addRun->addText("Hello");
 
     doc.addParagraph();
-    doc.addHeading("MyHead1");
+    doc.addHeading("MyHead1 Paragraph and Run");
 
     Paragraph *emptyP = doc.addParagraph();
     Run * tabRun = emptyP->addRun();
@@ -119,11 +120,12 @@ void TestDocument::testLoad()
     p2 = doc.addParagraph("Alignment3");
     p2->setAlignment(WD_PARAGRAPH_ALIGNMENT::JUSTIFY_HI);
 
-    doc.addPicture("://139924.jpg");
-    doc.addPicture("://139924.jpg", Inches::emus(1.25));
-    doc.addPicture("://149341.jpg", Cm::emus(13), Cm::emus(10));
-    doc.addPicture("://149341.jpg", Cm::emus(3), Cm::emus(10));
-    QImage img("://185607.jpg");
+    doc.addHeading("Image", 3);
+    doc.addPicture(imagePath2);
+    doc.addPicture(imagePath2, Inches::emus(1.25));
+    doc.addPicture(imagePath3, Cm::emus(13), Cm::emus(10));
+    doc.addPicture(imagePath3, Cm::emus(3), Cm::emus(10));
+    QImage img(imagePath4);
     qDebug() << img.size();
     doc.addPicture(img, Cm::emus(5));
     doc.addPicture(img, Cm::emus(2));
@@ -151,30 +153,67 @@ void TestDocument::testLoad()
 
     table->addColumn();
     table->addRow();
+
+    doc.addPageBreak();
+    doc.addHeading("Merge Table Cell", 3);
+
+    // Merge Table Cell
+    table = doc.addTable(5, 5);
+    cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+    cells.at(1)->addText("Word");
+    cells.at(2)->addText("!!!");
+    p1 = cells.at(2)->addParagraph();
+    r1 = p1->addRun();
+    r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(5));
+
+    Cell *cell00 = table->cell(0, 0);
+    Cell *cell12 = table->cell(1, 2);
+
+    cell00->merge(cell12);
+
+    doc.addParagraph();
+
+
+    Cell *cell04 = table->cell(0, 4);
+    Cell *cell44 = table->cell(3, 4);
+    cell44->merge(cell04);
+
+    cell44 = table->cell(2, 4);
+    cell44->addParagraph("new Paragraph");
+
+    cell00 = table->cell(0, 0);
+    Cell *cell22 = table->cell(2, 2);
+    cell00->merge(cell22);
+    table->addColumn();
+
+    // _______________
+    table = doc.addTable(3, 3);
+    table->setAlignment(WD_TABLE_ALIGNMENT::RIGHT);
+    cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+    cells.at(1)->merge(table->cell(2, 2));
+
+    table = doc.addTable(3, 3);
+    table->setAlignment(WD_TABLE_ALIGNMENT::CENTER);
+    cells = table->rowCells(0);
+    cells.at(0)->addText("Hello");
+
+    cells.at(0)->merge(cells.at(2));
+    doc.addParagraph("End");
+
     doc.save("aSave.docx");
 }
 
-void TestDocument::testImageInfo()
+void TestDocument::testLoadDoc()
 {
-
-    QMimeDatabase base;
-    QMimeType fileInfo = base.mimeTypeForFile(imagePath1);
-
-
-    QImage image1(imagePath1);
-    qDebug() << "Image Info" ;
-    qDebug() << "Image name" << fileInfo.name() << "  suffixes " << fileInfo.preferredSuffix();
-    qDebug() << fileInfo.preferredSuffix().toStdString().c_str();
-
-    qDebug() << image1.rect() << "  " << image1.size();
-    qDebug() << "dpiX" << image1.logicalDpiX() << "  dpiY  " << image1.logicalDpiY();
-    //qDebug() << "preX" << image.dotsPerMeterX() << "  perY  " << image.dotsPerMeterY();
-    qDebug() << "cacheKey1" << image1.cacheKey();
-
-    QImage image11(imagePath1);
-    QImage image2(imagePath2);
-    qDebug() << "cacheKey11" << image11.cacheKey();
+    Document doc("aSave.docx");
+    doc.addParagraph("Load a Document");
+    doc.addPicture(imagePath4, Cm::emus(3), Cm::emus(5));
+    doc.save("aSaveLoad.docx");
 }
+
+
 
 void TestDocument::testTable()
 {
@@ -187,7 +226,7 @@ void TestDocument::testTable()
     cells.at(2)->addText("!!!");
     Paragraph *p1 = cells.at(2)->addParagraph();
     Run *r1 = p1->addRun();
-    r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(10));
+    r1->addPicture(imagePath3, Cm::emus(3), Cm::emus(5));
 
     Cell *cell00 = table->cell(0, 0);
     Cell *cell12 = table->cell(1, 2);
@@ -216,7 +255,7 @@ void TestDocument::testTable()
 
 
     Cell *cell04 = table->cell(0, 4);
-    Cell *cell44 = table->cell(2, 4);
+    Cell *cell44 = table->cell(3, 4);
     cell44->merge(cell04);
 
     cell44 = table->cell(2, 4);
@@ -225,6 +264,7 @@ void TestDocument::testTable()
     cell00 = table->cell(0, 0);
     Cell *cell22 = table->cell(2, 2);
     cell00->merge(cell22);
+    table->addColumn();
 
     // _______________
     table = doc.addTable(3, 3);
@@ -241,6 +281,29 @@ void TestDocument::testTable()
     cells.at(0)->merge(cells.at(2));
 
     doc.save("atable.docx");
+}
+
+
+void TestDocument::testImageInfo()
+{
+
+    QMimeDatabase base;
+    QMimeType fileInfo = base.mimeTypeForFile(imagePath1);
+
+
+    QImage image1(imagePath1);
+    qDebug() << "Image Info" ;
+    qDebug() << "Image name" << fileInfo.name() << "  suffixes " << fileInfo.preferredSuffix();
+    qDebug() << fileInfo.preferredSuffix().toStdString().c_str();
+
+    qDebug() << image1.rect() << "  " << image1.size();
+    qDebug() << "dpiX" << image1.logicalDpiX() << "  dpiY  " << image1.logicalDpiY();
+    //qDebug() << "preX" << image.dotsPerMeterX() << "  perY  " << image.dotsPerMeterY();
+    qDebug() << "cacheKey1" << image1.cacheKey();
+
+    QImage image11(imagePath1);
+    QImage image2(imagePath2);
+    qDebug() << "cacheKey11" << image11.cacheKey();
 }
 
 QTEST_APPLESS_MAIN(TestDocument)
