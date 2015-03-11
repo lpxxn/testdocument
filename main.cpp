@@ -10,7 +10,12 @@
 
 #include <QImage>
 #include <QMimeDatabase>
+#include <QElapsedTimer>
 #include <QMimeType>
+#include <QList>
+#include <QFile>
+#include <QTextStream>
+#include <QTranslator>
 
 
 #include <docx/document.h>
@@ -29,21 +34,45 @@ public:
 
 private Q_SLOTS:
     void testNewDoc();
-    void testLoadDoc();
-    void testImageInfo();    
+    void testMaxDoc();
     void testTable();
+
+    void testImageInfo();
+
+    void testLoadDoc();
+    void testLoadMaxDoc();
+    void testLoadTable();
 };
-
-
-TestDocument::TestDocument()
-{
-
-}
 
 const QString imagePath1("://c.png");
 const QString imagePath2("://139924.jpg");
 const QString imagePath3("://149341.jpg");
 const QString imagePath4("://185607.jpg");
+const QString imagePath5("Images/1%s.jpg");
+
+QList<QString> strList;
+
+TestDocument::TestDocument()
+{
+    // ://testStr.txt
+    QFile file("://testStr.txt");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug()<<"Can't open the file!"<<endl;
+    }
+
+    QTextStream stream(&file);
+    QString line;
+    do {
+        line = stream.readLine();
+        strList.append(line);
+    } while (!line.isNull());
+
+//    QTranslator* translator = new QTranslator;
+//    translator->load("Docx_zh_CN.qm");
+//    qApp->installTranslator(translator);
+
+}
+
 
 void TestDocument::testNewDoc()
 {
@@ -52,6 +81,12 @@ void TestDocument::testNewDoc()
     //://default.docx
 
     Document doc;
+
+//    QTranslator translator;
+//    if (translator.load("Docx_zh_CN.qm"))
+//        qApp->installTranslator(&translator);
+
+
     doc.addHeading("MyTitle", 0);
     Paragraph *p = doc.addParagraph("helleWord");
     p->insertParagraphBefore("Before", "ListBullet");
@@ -205,15 +240,38 @@ void TestDocument::testNewDoc()
     doc.save("aSave.docx");
 }
 
-void TestDocument::testLoadDoc()
+void TestDocument::testMaxDoc()
 {
-    Document doc("aSave.docx");
-    doc.addParagraph("Load a Document");
-    doc.addPicture(imagePath4, Cm::emus(3), Cm::emus(5));
-    doc.save("aSaveLoad.docx");
+        qsrand(QTime::currentTime().msec());
+        int strListCount = strList.count() - 1;
+
+        Document doc;
+        int ipageCount = 100;
+        QElapsedTimer timer;
+
+        QString strImagePath;
+        qDebug() << "start " << QTime::currentTime() << "-------***";
+        timer.start();
+        while (ipageCount > 0) {
+            ipageCount--;
+            int value1 = qrand() % strListCount;
+
+            QString str(strList.at(value1));
+            value1 = qrand() % strListCount;
+            str.append(strList.at(value1));
+
+            doc.addParagraph(str);
+
+            //if (ipageCount <  91) {
+            if (value1 <  91) {
+                strImagePath = QString("Images/1%1.jpg").arg(value1);
+                //strImagePath = QString("Images/1%1.jpg").arg(ipageCount);
+                doc.addPicture(strImagePath, Cm::emus(9));
+            }
+        }
+        qDebug() << "time " << QTime::currentTime() <<  "time count" << timer.elapsed();
+        doc.save("aMax.docx");
 }
-
-
 
 void TestDocument::testTable()
 {
@@ -236,21 +294,21 @@ void TestDocument::testTable()
     qDebug() << QString::fromLatin1("----Cell index  ") <<  cells.at(1)->cellIndex()
              << QStringLiteral("--Row index  ") << cells.at(1)->rowIndex();
 
-//    QList<Cell *> cells2 = table->rowCells(1);
-//    Cell *cell = cells2.at(0);
-//    Table *table2 = cell->addTable(5, 5, "MediumShading1");
-//    cells2 = table2->rowCells(1);
-//    cells2.at(0)->addText("Table!!!");
+    //    QList<Cell *> cells2 = table->rowCells(1);
+    //    Cell *cell = cells2.at(0);
+    //    Table *table2 = cell->addTable(5, 5, "MediumShading1");
+    //    cells2 = table2->rowCells(1);
+    //    cells2.at(0)->addText("Table!!!");
 
-//    p1 = cells2.at(2)->addParagraph();
-//    r1 = p1->addRun();
+    //    p1 = cells2.at(2)->addParagraph();
+    //    r1 = p1->addRun();
 
-//    r1->addPicture(imagePath2, Cm::emus(3), Cm::emus(10));
+    //    r1->addPicture(imagePath2, Cm::emus(3), Cm::emus(10));
 
 
-//    table->addRow();
-//    table->addColumn();
-//    table->addColumn();
+    //    table->addRow();
+    //    table->addColumn();
+    //    table->addColumn();
     doc.addParagraph();
 
 
@@ -283,7 +341,6 @@ void TestDocument::testTable()
     doc.save("atable.docx");
 }
 
-
 void TestDocument::testImageInfo()
 {
 
@@ -305,6 +362,76 @@ void TestDocument::testImageInfo()
     QImage image2(imagePath2);
     qDebug() << "cacheKey11" << image11.cacheKey();
 }
+
+
+void TestDocument::testLoadDoc()
+{
+    QFile docfile("aSave.docx");
+    if (!docfile.open(QIODevice::ReadOnly)) {
+        qDebug() << "open filed..";
+        return;
+    }
+    //Document doc("aSave.docx");
+    Document doc(&docfile);
+    doc.addParagraph("Load a Document");
+    doc.addPicture(imagePath4, Cm::emus(3), Cm::emus(5));
+    QList<Paragraph*> ps = doc.paragraphs();
+    qDebug() << " Paragraph count " << ps.count();
+    Paragraph *p = ps.at(3);
+    p->addRun("Append1");
+    p->insertParagraphBefore("AppendBefore");
+    doc.save("aSaveLoad.docx");
+}
+
+void TestDocument::testLoadMaxDoc()
+{
+    //    Document doc("auto.docx");
+    //    int ipageCount = 5;
+    //    while(ipageCount > 0) {
+    //        ipageCount--;
+    //        qDebug() << ipageCount;
+    //        doc.addParagraph("Load a Document");
+    //        doc.addPicture(imagePath4, Cm::emus(3));
+
+    //    }
+    //    doc.save("aLoadMax.docx");
+
+    Document doc2("aMax.docx");
+    doc2.addParagraph("Load a Document");
+    QList<Paragraph*> ps = doc2.paragraphs();
+    Paragraph *p0 = ps.at(0);
+    p0->addText("Test");
+    doc2.save("autoLoadMax.docx");
+    //doc2.save("autoLoadMax2.docx");
+
+}
+
+
+
+void TestDocument::testLoadTable()
+{
+    Document doc(QStringLiteral("atable.docx"));
+
+    QList<Table*> tables = doc.tables();
+    Table *table0 = tables.at(0);
+    qDebug() << table0->rows().count();
+    Cell *cell12 = table0->cell(1, 2);
+    cell12->addParagraph("MyCell12");
+
+    Cell *cell34 = table0->cell(3, 4);
+    cell34->addText("Cell34");
+    Cell *cell24 = table0->cell(2, 4);
+    cell24->addText("AppendText");
+
+    Cell *cell32 = table0->cell(3, 2);
+    cell32->addText("Cell22");
+
+
+    doc.save("atableLoad.docx");
+}
+
+
+
 
 QTEST_APPLESS_MAIN(TestDocument)
 #include "main.moc"
